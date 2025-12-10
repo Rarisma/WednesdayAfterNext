@@ -7,7 +7,7 @@ import { Image } from 'expo-image';
 import OldBoard from "./Pages/OldBoard";
 import CreateNonogram from "./Pages/CreateNonogram";
 import PuzzleList from "./Pages/PuzzleList";
-import { toByteArray } from 'base64-js';
+import { Ionicons } from '@expo/vector-icons';
 
 const Tab = createBottomTabNavigator();
 
@@ -27,7 +27,19 @@ function ShareTest() {
 export default function App() {
     return (
         <NavigationContainer>
-            <Tab.Navigator>
+            <Tab.Navigator
+              screenOptions={({ route }) => ({
+                tabBarIcon: ({ focused, color, size }) => {
+                  let iconName;
+
+                  if (route.name === 'Puzzle Select') iconName = 'grid';
+                  else if (route.name === 'Play') iconName = 'play';
+                  else if (route.name === 'Create') iconName = 'create';
+                  else if (route.name === 'ShareTest') iconName = 'share';
+
+                  return <Ionicons name={iconName} size={size} color={color} />;
+                },
+              })}>
                 <Tab.Screen name="Puzzle Select" component={PuzzleList}/>
                 <Tab.Screen name="Play" component={OldBoard} />
                 <Tab.Screen name="Create" component={CreateNonogram} />

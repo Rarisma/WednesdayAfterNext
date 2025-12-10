@@ -5,6 +5,7 @@ import {useThemeColors} from "../Styles";
 
 const puzzleList = [
     {name: 'Target', asset: require('../assets/puzzles/Target.png'), size: "5x5"},
+    {name: 'Heart', asset: require('../assets/puzzles/Heart.png'), size: "8x8"},
 ];
 
 
