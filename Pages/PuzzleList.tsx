@@ -1,5 +1,5 @@
 import UPNG from 'upng-js';
-import { View, Text, TouchableOpacity, Modal} from 'react-native';
+import {View, Text, TouchableOpacity, Modal, Button} from 'react-native';
 import { Asset } from 'expo-asset';
 import { useStyles } from "../Styles";
 import { useNavigation } from '@react-navigation/native';
@@ -62,10 +62,10 @@ export default function PuzzleList({ onSelect }: { onSelect: (matrix: number[][]
     };
 
     return (
-        <View>
+        <View style={[styles.Container, {borderRadius:0, flex:1, padding: 0, margin: 0}]}>
             {puzzleList.map((puzzle, index) => (
                 <TouchableOpacity activeOpacity={0.7} key={puzzle.name}  onPress={() => handlePress(puzzle)} >
-                    <View style={[styles.Container,{ flexDirection: 'row', gap: 4 }]}>
+                    <View style={[styles.Container,{ flexDirection: 'row', gap: 4, backgroundColor:styles.cell.backgroundColor }]}>
                         <Text style={styles.Text}>{index} - </Text>
                         <Text style={styles.Text}>{puzzle.name}</Text>
                         <Text style={styles.Text}>{puzzle.size}</Text>
@@ -73,6 +73,15 @@ export default function PuzzleList({ onSelect }: { onSelect: (matrix: number[][]
                     </View>
                 </TouchableOpacity>
             ))}
+
+            <View style={{ alignItems: 'center', justifyContent: 'center'}}>
+                {/* buttons row .*/}
+                <TouchableOpacity style={{borderRadius: 64,  backgroundColor: "#19647E", width:150, height:50,
+                    alignItems: 'center', justifyContent: 'center'}}>
+                    <Text style={{color:"#fff", }}>+ Create Puzzle</Text>
+                </TouchableOpacity>
+            </View>
+
         </View>
     );
 }

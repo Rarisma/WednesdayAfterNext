@@ -34,10 +34,10 @@ export const useStyles = () => {
 
         Container: {
             backgroundColor: colors.border,
-            margin: 10,
+            margin: 5,
             padding: 10,
             borderWidth: 5,
-            borderRadius: 5,
+            borderRadius: 36,
             borderColor: colors.border,
         } as ViewStyle,
 

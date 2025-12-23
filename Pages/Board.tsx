@@ -31,7 +31,7 @@ const getClues = (line: number[]): number[] => {
     return clues.length ? clues : [0];
 };
 
-export function Nonogram({solution, cellSize = 20, onWin}: NonogramProps) {
+export function Board({solution, cellSize = 20, onWin}: NonogramProps) {
     //Get size of solutions.
     const rows = solution.length;
     const cols = solution[0].length;
