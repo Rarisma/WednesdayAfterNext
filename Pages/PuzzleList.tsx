@@ -1,44 +1,77 @@
 import UPNG from 'upng-js';
-import {View, Text, ActivityIndicator, Button, Pressable, TouchableOpacity} from 'react-native';
-import {Asset} from 'expo-asset';
-import {useThemeColors} from "../Styles";
+import { View, Text, TouchableOpacity, Modal} from 'react-native';
+import { Asset } from 'expo-asset';
+import { useStyles } from "../Styles";
+import { useNavigation } from '@react-navigation/native';
 
-const puzzleList = [
-    {name: 'Target', asset: require('../assets/puzzles/Target.png'), size: "5x5"},
-    {name: 'Heart', asset: require('../assets/puzzles/Heart.png'), size: "8x8"},
+//Registry of puzzles from assets.
+export const puzzleList = [
+    { name: 'Target', asset: require('../assets/puzzles/Target.png'), size: "5x5" },
+    { name: 'Heart', asset: require('../assets/puzzles/Heart.png'), size: "8x8" },
+    { name: 'Question Mark', asset: require('../assets/puzzles/QuestionMark.png'), size: "10x10" },
+
+    //Jam's Adjustable Mirrors Assets used via explicit permission of Lycoris Studio UK.
+    { name: 'Jam Jar', asset: require('../assets/puzzles/JamJar.png'), size: "16x16" },
+    { name: 'Mirror', asset: require('../assets/puzzles/Mirror.png'), size: "64x64" },
 ];
 
+/**
+ * Loads the puzzle from /assets/puzzles and returns info via a matrix.
+ * @param puzzle Puzzle object (get from puzzle list UI)
+ */
+export async function LoadPuzzle(puzzle: { name: string; asset: any; size: string }) {
+    const { name, asset } = puzzle;
 
-async function LoadPuzzle(puzzle: { name: string; asset: any; size: string; }){
-    //Load asset from resources
+    //Load base png
     const assetObj = Asset.fromModule(asset);
     await assetObj.downloadAsync();
     const response = await fetch(assetObj.localUri || assetObj.uri);
     const bytes = new Uint8Array(await response.arrayBuffer());
 
-    //Decode properly to png file
+    //Load as ARGB
     const png = UPNG.decode(bytes.buffer);
-    const rgba = UPNG.toRGBA8(png)[0];
-    return {name, width: png.width, height: png.height, data: new Uint8Array(rgba)};
+    const rgba = new Uint8Array(UPNG.toRGBA8(png)[0]);
+
+    //Parse to Matrix
+    const matrix: number[][] = [];
+    for (let y = 0; y < png.height; y++) {
+        const row: number[] = [];
+        for (let x = 0; x < png.width; x++) {
+            const i = (y * png.width + x) * 4;
+            row.push(rgba[i + 3] > 0 ? 1 : 0); //All pixels are 1 unless the Alpha Channel is zero.
+        }
+        matrix.push(row);
+    }
+
+    //Return puzzle object with matrix.
+    return { name, width: png.width, height: png.height, matrix };
 }
 
-export default function PuzzleList() {
-    const colors = useThemeColors();
+/**qw
+ * Puzzle List UI
+ * @param onSelect
+ * @constructor
+ */
+export default function PuzzleList({ onSelect }: { onSelect: (matrix: number[][]) => void }) {
+    const styles = useStyles();
+    const navigation = useNavigation<any>();
+
+    const handlePress = async (puzzle: typeof puzzleList[0]) => {
+        const { matrix } = await LoadPuzzle(puzzle);
+        navigation.navigate('Play', { solution: matrix });
+    };
+
     return (
         <View>
-            {puzzleList.map((puzzle) => (
-                <TouchableOpacity activeOpacity={0.7} key={puzzle.name} onPress={() => LoadPuzzle(puzzle)}>
-                    <View style={{
-                        flexDirection: 'row', gap: 8, borderColor: colors.border,
-                        borderWidth: 5, borderRadius: 5, backgroundColor: colors.border, margin: 10, padding: 10
-                        }}>
-                        <Text style={{fontSize: 20}}>{puzzleList.indexOf(puzzle)} - </Text>
-                        <Text style={{fontSize: 20}}>{puzzle.name}</Text>
-                        <Text style={{fontSize: 20}}>{puzzle.size}</Text>
-                        <Text style={{fontSize: 20, marginLeft: 'auto'}}>00:00</Text>
+            {puzzleList.map((puzzle, index) => (
+                <TouchableOpacity activeOpacity={0.7} key={puzzle.name}  onPress={() => handlePress(puzzle)} >
+                    <View style={[styles.Container,{ flexDirection: 'row', gap: 4 }]}>
+                        <Text style={styles.Text}>{index} - </Text>
+                        <Text style={styles.Text}>{puzzle.name}</Text>
+                        <Text style={styles.Text}>{puzzle.size}</Text>
+                        <Text style={[styles.Text, { marginLeft: 'auto' }]}>00:00</Text>
                     </View>
                 </TouchableOpacity>
-
             ))}
         </View>
     );
