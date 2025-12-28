@@ -3,6 +3,7 @@ import {View, Text, TouchableOpacity, Modal, Button} from 'react-native';
 import { Asset } from 'expo-asset';
 import { useStyles } from "../Styles";
 import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 
 //Registry of puzzles from assets.
 export const puzzleList = [
@@ -74,11 +75,17 @@ export default function PuzzleList({ onSelect }: { onSelect: (matrix: number[][]
                 </TouchableOpacity>
             ))}
 
-            <View style={{ alignItems: 'center', justifyContent: 'center'}}>
+            <View style={{ alignItems: 'center', justifyContent: 'center', flexDirection: 'row',
+                gap:10, marginTop: 'auto', marginBottom:20 }}>
                 {/* buttons row .*/}
                 <TouchableOpacity style={{borderRadius: 64,  backgroundColor: "#19647E", width:150, height:50,
                     alignItems: 'center', justifyContent: 'center'}}>
                     <Text style={{color:"#fff", }}>+ Create Puzzle</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={{borderRadius: 64,  backgroundColor: "#19647E", width:150, height:50,
+                    alignItems: 'center', justifyContent: 'center', flexDirection: 'row',}}>
+                    <Ionicons name="download-outline" size={24} color="white" />
+                    <Text style={{color:"#fff", }}>Get Puzzles</Text>
                 </TouchableOpacity>
             </View>
 
