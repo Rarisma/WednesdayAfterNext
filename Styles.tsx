@@ -33,12 +33,31 @@ export const useStyles = () => {
         } as TextStyle,
 
         Container: {
+            backgroundColor: colors.background,
+            margin: 5,
+            padding: 10,
+            borderWidth: 5,
+            borderRadius: 36,
+            borderColor: colors.border,
+        } as ViewStyle,
+
+        HorizontalContainer: {
             backgroundColor: colors.border,
             margin: 5,
             padding: 10,
             borderWidth: 5,
             borderRadius: 36,
             borderColor: colors.border,
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'row',
+        } as ViewStyle,
+
+        Page: {
+            backgroundColor: colors.background,
+            margin:0,
+            padding:0,
+            flex:1
         } as ViewStyle,
 
       cell: {
@@ -48,6 +67,15 @@ export const useStyles = () => {
         alignItems: 'center',
         backgroundColor: colors.background,
       },
+
+      Button: {
+          borderRadius: 64,
+          backgroundColor: "#19647E",
+          height:50,
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'row'
+      } as ViewStyle,
 
       filledCell: { backgroundColor: colors.text, borderColor: colors.text },
     };

@@ -1,6 +1,8 @@
 {
   "expo": {
-    "plugins": ["@react-native-google-signin/google-signin"],
+    "plugins": [
+      "@react-native-google-signin/google-signin"
+    ],
     "name": "Nonogame",
     "slug": "WednesdayAfterNext",
     "version": "1.0.0",
@@ -15,7 +17,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "googleServicesFile": "./GoogleService-Info.plist"
+      "bundleIdentifier": "net.rarisma.wednesdayafternext"
     },
     "android": {
       "googleServicesFile": "./google-services.json",
@@ -24,7 +26,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.rarisma.WednesdayAfterNext"
+      "package": "net.rarisma.wednesdayafternext"
     },
     "web": {
       "favicon": "./assets/favicon.png"

@@ -142,7 +142,7 @@ export function Board({solution, cellSize = 20, onWin}: NonogramProps) {
 
     return (
         <GestureDetector gesture={gesture}>
-            <View style={styles.Container}>
+            <View style={styles.Page}>
                 <View style={s.row}>
                     <View style={{width: clueWidth, height: clueHeight}}/>
                     {colClues.map((clue, i) => (

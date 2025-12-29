@@ -1,7 +1,7 @@
 import UPNG from 'upng-js';
 import {View, Text, TouchableOpacity, Modal, Button} from 'react-native';
 import { Asset } from 'expo-asset';
-import { useStyles } from "../Styles";
+import {useStyles, useThemeColors} from "../Styles";
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -11,7 +11,7 @@ export const puzzleList = [
     { name: 'Heart', asset: require('../assets/puzzles/Heart.png'), size: "8x8" },
     { name: 'Question Mark', asset: require('../assets/puzzles/QuestionMark.png'), size: "10x10" },
 
-    //Jam's Adjustable Mirrors Assets used via explicit permission of Lycoris Studio UK.
+    //Jam's Adjustable Mirrors Assets used via explicit permission of Lycoris Studio UK (Who I am a developer for).
     { name: 'Jam Jar', asset: require('../assets/puzzles/JamJar.png'), size: "16x16" },
     { name: 'Mirror', asset: require('../assets/puzzles/Mirror.png'), size: "64x64" },
 ];
@@ -55,6 +55,7 @@ export async function LoadPuzzle(puzzle: { name: string; asset: any; size: strin
  */
 export default function PuzzleList({ onSelect }: { onSelect: (matrix: number[][]) => void }) {
     const styles = useStyles();
+    const colors = useThemeColors();
     const navigation = useNavigation<any>();
 
     const handlePress = async (puzzle: typeof puzzleList[0]) => {
@@ -63,29 +64,28 @@ export default function PuzzleList({ onSelect }: { onSelect: (matrix: number[][]
     };
 
     return (
-        <View style={[styles.Container, {borderRadius:0, flex:1, padding: 0, margin: 0}]}>
+        <View style={styles.Page}>
             {puzzleList.map((puzzle, index) => (
                 <TouchableOpacity activeOpacity={0.7} key={puzzle.name}  onPress={() => handlePress(puzzle)} >
-                    <View style={[styles.Container,{ flexDirection: 'row', gap: 4, backgroundColor:styles.cell.backgroundColor }]}>
+                    <View style={[styles.HorizontalContainer, {backgroundColor:colors.border}]}>
                         <Text style={styles.Text}>{index} - </Text>
                         <Text style={styles.Text}>{puzzle.name}</Text>
-                        <Text style={styles.Text}>{puzzle.size}</Text>
-                        <Text style={[styles.Text, { marginLeft: 'auto' }]}>00:00</Text>
+                        <Text style={[styles.Text, { marginLeft: 'auto' }]}>{puzzle.size}</Text>
+                        <Text style={[styles.Text, { marginLeft:20 }]}>00:00</Text>
                     </View>
                 </TouchableOpacity>
             ))}
 
-            <View style={{ alignItems: 'center', justifyContent: 'center', flexDirection: 'row',
-                gap:10, marginTop: 'auto', marginBottom:20 }}>
+            <View style={[styles.HorizontalContainer, {gap:40, marginTop: 'auto', marginBottom:20, backgroundColor:null, borderColor:null, borderWidth:0}]}>
                 {/* buttons row .*/}
-                <TouchableOpacity style={{borderRadius: 64,  backgroundColor: "#19647E", width:150, height:50,
-                    alignItems: 'center', justifyContent: 'center'}}>
-                    <Text style={{color:"#fff", }}>+ Create Puzzle</Text>
+                <TouchableOpacity style={[styles.Button, {width:150}]} onPress={() => navigation.navigate('Create')}>
+                    <Ionicons name="add-outline" size={24} color="white" />
+                    <Text style={{color:"#fff", marginLeft:10}}>Create Puzzle</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={{borderRadius: 64,  backgroundColor: "#19647E", width:150, height:50,
-                    alignItems: 'center', justifyContent: 'center', flexDirection: 'row',}}>
+
+                <TouchableOpacity style={[styles.Button, {width:150}]} onPress={() => navigation.navigate('DrawingBoard')}>
                     <Ionicons name="download-outline" size={24} color="white" />
-                    <Text style={{color:"#fff", }}>Get Puzzles</Text>
+                    <Text style={{color:"#fff", marginLeft:10}}>Get Puzzles</Text>
                 </TouchableOpacity>
             </View>
 

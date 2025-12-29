@@ -44,7 +44,7 @@ export default function Nonogram() {
     const boardKey = JSON.stringify(solution);
     let Completed = false;
     return (
-        <View style={[Styles.Container, {margin: 0, flex: 1, borderRadius:0}]}>
+        <View style={[Styles.Page, {margin: 0, flex: 1}]}>
             {/*Timer*/}
             <Text style={[Styles.Text, {textAlign: 'center', fontSize: 32, margin: 10}]}>
                 {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
@@ -70,7 +70,7 @@ export default function Nonogram() {
 
             <Modal visible={Completed} animationType="slide" transparent={true}
                    onRequestClose={() => setVisible(false)}>
-                <View style={{flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)'}}>
+                <View style={{flex: 1, justifyContent: 'center'}}>
                     <View style={{margin: 20, padding: 20, backgroundColor: 'white', borderRadius: 10}}>
                         <Text>Modal Content</Text>
                         <Button title="Close" onPress={() => setVisible(false)}/>
