@@ -1,17 +1,23 @@
 import {GoogleSignin, GoogleSigninButton} from '@react-native-google-signin/google-signin';
-import {Text, TouchableOpacity, View} from "react-native";
+import {Share, Text, TouchableOpacity, View} from "react-native";
 import auth from '@react-native-firebase/auth';
 import { Image } from 'expo-image';
 import {useStyles, useThemeColors} from "../Styles";
 import {Ionicons} from "@expo/vector-icons";
 import {useEffect, useState} from "react";
 import {collection, getFirestore, limit, query} from '@react-native-firebase/firestore';
+import {useNavigation} from "@react-navigation/native";
 
+/*
+Configure Google Sign-In and access/auth to firebase
+ */
 const signInWithGoogle = async () => {
     try {
+        //Check stuff is available
         await GoogleSignin.hasPlayServices();
         const { data } = await GoogleSignin.signIn();
 
+        //Get token
         const googleCredential = auth.GoogleAuthProvider.credential(data.idToken);
         await auth().signInWithCredential(googleCredential);
     }
@@ -25,7 +31,8 @@ export default function DrawingBoard() {
     const colors = useThemeColors();
     const [puzzles, setPuzzles] = useState([]);
     const [iconsVisible, setIconsVisible] = useState(false);
-
+    const navigation = useNavigation();
+    //Get 20 items from firestore.
     useEffect(() => {
         const fetchPuzzles = async () => {
             const snapshot = await query(collection(getFirestore(), 'Levels'), limit(20)).get();
@@ -34,6 +41,7 @@ export default function DrawingBoard() {
         fetchPuzzles();
     }, []);
 
+    //User isn't signed in, show sign in UI
     if (User == null){
         return (
             <View style={[Styles.Page, {alignItems:'center', justifyContent:'center'}]}>
@@ -45,6 +53,7 @@ export default function DrawingBoard() {
         );
     }
 
+    //User is signed in, show drawing board UI
     return (
         <View style={[Styles.Page]}>
             <View style={[Styles.HorizontalContainer,{ alignItems:'center', justifyContent:'flex-start'}]}>
@@ -53,26 +62,28 @@ export default function DrawingBoard() {
                 <Text style={[Styles.Text, {marginLeft:'auto', marginRight:20}]}>Solved:XX</Text>
 
                 {/*Search, Icons and Logoff buttons*/}
-                <TouchableOpacity style={[Styles.Button,{width:50, justifyContent:'center', marginRight:10}]}
+                <TouchableOpacity style={Styles.IconButton}
                                   onPress={async () => { setIconsVisible(!iconsVisible); }}>
-                        <Ionicons name={iconsVisible ? "eye-outline" : "eye-off-outline"} size={24} color="#fff" />
+                        <Ionicons name={iconsVisible ? "eye-outline" : "eye-off-outline"} size={24} color={"white"} />
                 </TouchableOpacity>
-                <TouchableOpacity style={[Styles.Button,{width:50, justifyContent:'center', marginRight:10}]}
-                                  onPress={async () => { }}>
-                    <Ionicons name="search-outline" size={24} color="#fff" />
-                </TouchableOpacity>
-                <TouchableOpacity style={[Styles.Button,{width:50, justifyContent:'center'}]}
+                <TouchableOpacity style={Styles.IconButton}
                                   onPress={async () => {
+
+                                  }}>
+                    <Ionicons name="search-outline" size={24} color={"white"} />
+                </TouchableOpacity>
+                <TouchableOpacity style={Styles.IconButton} onPress={async () => {
                                       await GoogleSignin.signOut();
                                       await auth().signOut();
-                                      invalidateLayout(x => x + 1);
-                                  }}>
-                    <Ionicons name="log-out-outline" size={24} color="#fff" />
+                                      //Refresh UI
+                                      navigation.goBack();
+                                    }}>
+                    <Ionicons name="log-out-outline" size={24} color={"white"} />
                 </TouchableOpacity>
             </View>
 
             {puzzles.map((puzzle, _) => (
-                <TouchableOpacity activeOpacity={0.7} key={puzzle.id}   >
+                <TouchableOpacity activeOpacity={0.7} key={puzzle.id}>
                     <View style={[Styles.HorizontalContainer, {backgroundColor:colors.border}]}>
                         {iconsVisible &&
                         (

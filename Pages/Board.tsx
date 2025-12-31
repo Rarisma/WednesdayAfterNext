@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useRef, useCallback} from 'react';
+import React, {useState, useMemo, useRef, useCallback, useEffect} from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 import {Gesture, GestureDetector} from 'react-native-gesture-handler';
 import {useStyles} from "../Styles";
@@ -65,17 +65,24 @@ export function Board({solution, cellSize = 20, onWin}: NonogramProps) {
         return row >= 0 && row < rows && col >= 0 && col < cols ? {row, col} : null;
     }, [clueWidth, clueHeight, cellSize, rows, cols]);
 
+    const hasWon = useMemo(() =>
+        grid.every((row, ri) => row.every((cell, ci) =>
+            (cell === 1) === (solution[ri][ci] === 1)
+        )), [grid, solution]);
+
+    useEffect(() => {
+        if (hasWon) {
+            onWin?.();
+        }
+    }, [hasWon, onWin]);
+
     const setCell = useCallback((r: number, c: number, state: CellState) => {
         setGrid(prev => {
             const next = prev.map(row => [...row]);
             next[r][c] = state;
-            if (next.every((row, ri) => row.every((cell, ci) =>
-                (cell === 1) === (solution[ri][ci] === 1)))) {
-                onWin?.();
-            }
             return next;
         });
-    }, [solution, onWin]);
+    }, []);
 
     const toggleCell = useCallback((x: number, y: number, crossMode: boolean) => {
         const cell = posToCell(x, y);
@@ -117,6 +124,7 @@ export function Board({solution, cellSize = 20, onWin}: NonogramProps) {
     // Tap for single fill
     const tap = Gesture.Tap()
         .maxDuration(250)
+        .runOnJS(true)
         .onEnd((e) => toggleCell(e.x, e.y, false));
 
     // Long press for single cross
@@ -127,6 +135,7 @@ export function Board({solution, cellSize = 20, onWin}: NonogramProps) {
     // Pan for fill drag (needs some movement to activate)
     const fillPan = Gesture.Pan()
         .minDistance(10)
+        .runOnJS(true)
         .onStart((e) => startDrag(e.x, e.y, false))
         .onUpdate((e) => continueDrag(e.x, e.y))
         .onEnd(endDrag);
@@ -134,6 +143,7 @@ export function Board({solution, cellSize = 20, onWin}: NonogramProps) {
     // Pan for cross drag (requires long press first)
     const crossPan = Gesture.Pan()
         .activateAfterLongPress(300)
+        .runOnJS(true)
         .onStart((e) => startDrag(e.x, e.y, true))
         .onUpdate((e) => continueDrag(e.x, e.y))
         .onEnd(endDrag);

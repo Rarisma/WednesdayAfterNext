@@ -77,6 +77,17 @@ export const useStyles = () => {
           flexDirection: 'row'
       } as ViewStyle,
 
+      IconButton: {
+          width:50,
+          justifyContent:'center',
+          marginRight:10,
+          borderRadius: 64,
+          backgroundColor: "#19647E",
+          height:50,
+          alignItems: 'center',
+          flexDirection: 'row'
+      } as ViewStyle,
+
       filledCell: { backgroundColor: colors.text, borderColor: colors.text },
     };
 };

@@ -2,9 +2,11 @@ import UPNG from 'upng-js';
 import {View, Text, TouchableOpacity, Modal, Button} from 'react-native';
 import { Asset } from 'expo-asset';
 import {useStyles, useThemeColors} from "../Styles";
-import { useNavigation } from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import {useCallback, useState} from "react";
 
+export const storage = createMMKV()
 //Registry of puzzles from assets.
 export const puzzleList = [
     { name: 'Target', asset: require('../assets/puzzles/Target.png'), size: "5x5" },
@@ -50,17 +52,17 @@ export async function LoadPuzzle(puzzle: { name: string; asset: any; size: strin
 
 /**qw
  * Puzzle List UI
- * @param onSelect
  * @constructor
  */
-export default function PuzzleList({ onSelect }: { onSelect: (matrix: number[][]) => void }) {
+export default function PuzzleList() {
     const styles = useStyles();
     const colors = useThemeColors();
     const navigation = useNavigation<any>();
-
+    const [, invalidateLayout] = useState(0);
+    useFocusEffect(useCallback(() => {invalidateLayout(n => n + 1); }, []));
     const handlePress = async (puzzle: typeof puzzleList[0]) => {
         const { matrix } = await LoadPuzzle(puzzle);
-        navigation.navigate('Play', { solution: matrix });
+        navigation.navigate('Play', { solution: matrix, id:puzzleList.indexOf(puzzle), name:puzzle.name });
     };
 
     return (
@@ -68,23 +70,27 @@ export default function PuzzleList({ onSelect }: { onSelect: (matrix: number[][]
             {puzzleList.map((puzzle, index) => (
                 <TouchableOpacity activeOpacity={0.7} key={puzzle.name}  onPress={() => handlePress(puzzle)} >
                     <View style={[styles.HorizontalContainer, {backgroundColor:colors.border}]}>
-                        <Text style={styles.Text}>{index} - </Text>
+                        {storage.getBoolean('Puzzle'+index) ? (
+                            <Ionicons name="checkmark-circle-outline" size={28} color={colors.text} style={{marginRight:20}} />
+                        ) : (/* Empty padding to visually line up the puzzle titles */
+                            <View style={{ width: 46, height: 0 }} />)}
                         <Text style={styles.Text}>{puzzle.name}</Text>
-                        <Text style={[styles.Text, { marginLeft: 'auto' }]}>{puzzle.size}</Text>
-                        <Text style={[styles.Text, { marginLeft:20 }]}>00:00</Text>
+                        <Text style={[styles.Text, { marginLeft: 'auto'}]}>{puzzle.size}</Text>
+                        <Text style={[styles.Text, { marginLeft:20 }]}>{storage.getString('PuzzleTime'+index)}</Text>
                     </View>
                 </TouchableOpacity>
             ))}
 
-            <View style={[styles.HorizontalContainer, {gap:40, marginTop: 'auto', marginBottom:20, backgroundColor:null, borderColor:null, borderWidth:0}]}>
+            <View style={[styles.HorizontalContainer, {gap:40, marginTop: 'auto',
+                marginBottom:20, backgroundColor:null, borderColor:null, borderWidth:0}]}>
                 {/* buttons row .*/}
                 <TouchableOpacity style={[styles.Button, {width:150}]} onPress={() => navigation.navigate('Create')}>
-                    <Ionicons name="add-outline" size={24} color="white" />
+                    <Ionicons name="add-outline" size={24} color={"white"} />
                     <Text style={{color:"#fff", marginLeft:10}}>Create Puzzle</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={[styles.Button, {width:150}]} onPress={() => navigation.navigate('DrawingBoard')}>
-                    <Ionicons name="download-outline" size={24} color="white" />
+                    <Ionicons name="download-outline" size={24} color={"white"} />
                     <Text style={{color:"#fff", marginLeft:10}}>Get Puzzles</Text>
                 </TouchableOpacity>
             </View>
