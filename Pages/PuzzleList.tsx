@@ -5,8 +5,8 @@ import {useStyles, useThemeColors} from "../Styles";
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import {useCallback, useState} from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const storage = createMMKV()
 //Registry of puzzles from assets.
 export const puzzleList = [
     { name: 'Target', asset: require('../assets/puzzles/Target.png'), size: "5x5" },
@@ -67,16 +67,16 @@ export default function PuzzleList() {
 
     return (
         <View style={styles.Page}>
-            {puzzleList.map((puzzle, index) => (
+            {puzzleList.map(async (puzzle, index) => (
                 <TouchableOpacity activeOpacity={0.7} key={puzzle.name}  onPress={() => handlePress(puzzle)} >
                     <View style={[styles.HorizontalContainer, {backgroundColor:colors.border}]}>
-                        {storage.getBoolean('Puzzle'+index) ? (
+                        {await AsyncStorage.getItem('Puzzle'+index) == 'true' ? (
                             <Ionicons name="checkmark-circle-outline" size={28} color={colors.text} style={{marginRight:20}} />
                         ) : (/* Empty padding to visually line up the puzzle titles */
                             <View style={{ width: 46, height: 0 }} />)}
                         <Text style={styles.Text}>{puzzle.name}</Text>
                         <Text style={[styles.Text, { marginLeft: 'auto'}]}>{puzzle.size}</Text>
-                        <Text style={[styles.Text, { marginLeft:20 }]}>{storage.getString('PuzzleTime'+index)}</Text>
+                        <Text style={[styles.Text, { marginLeft:20 }]}>{await AsyncStorage.getItem('PuzzleTime'+index)}</Text>
                     </View>
                 </TouchableOpacity>
             ))}

@@ -4,10 +4,9 @@ import {useFocusEffect, useRoute} from '@react-navigation/native';
 import {useCallback, useState, useEffect,} from "react";
 import {useStopwatch} from "react-timer-hook";
 import {useStyles} from "../Styles";
-import {storage} from "./PuzzleList";
 import {Ionicons} from "@expo/vector-icons";
 import { useNavigation } from '@react-navigation/native';
-import Confetti from 'react-native-reanimated-confetti';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function Nonogram() {
     const [visible, setVisible] = useState(false);
     const Styles = useStyles();
@@ -37,33 +36,38 @@ export default function Nonogram() {
     const colClues = solution[0].map((_, c) => getClues(solution.map(r => r[c])));
     const clueWidth = Math.max(...rowClues.map(c => c.length)) * 20;
     const clueHeight = Math.max(...colClues.map(c => c.length)) * 20;
-
+    let BestTime = "none";
     //Use a stable key from the solution
     const boardKey = JSON.stringify(solution);
     useFocusEffect(useCallback(() => {invalidateLayout(n => n + 1); }, []));
 
     useEffect(() => {
-        if (hasWon) {
-            storage.set('Puzzle' + route.params?.id, true);
-            let best = storage.getString('PuzzleTime' + route.params?.id);
+         async function doWin() {
+            if (hasWon) {
+                await AsyncStorage.setItem('Puzzle' + route.params?.id, true);
+                let best = await AsyncStorage.getItem('PuzzleTime' + route.params?.id);
 
-            if (best == undefined) { //No best time
-                storage.set('PuzzleTime' + route.params?.id, String(minutes).padStart(2, '0') +
-                    ':' + String(seconds).padStart(2, '0'));
-            }
-            else{ // Compare current time and best times
-                const inttime = parseInt(best.split(':')[0]) + parseInt(best.split(':')[1])/60;
-                const currtime = minutes + seconds/60;
-                if (currtime < inttime){ //New Best time
-                    storage.set('PuzzleTime' + route.params?.id, String(minutes).padStart(2, '0') +
+                if (best == undefined) { //No best time
+                    await AsyncStorage.setItem('PuzzleTime' + route.params?.id, String(minutes).padStart(2, '0') +
                         ':' + String(seconds).padStart(2, '0'));
                 }
+                else{ // Compare current time and best times
+                    const inttime = parseInt(best.split(':')[0]) + parseInt(best.split(':')[1])/60;
+                    const currtime = minutes + seconds/60;
+                    if (currtime < inttime){ //New Best time
+                        await AsyncStorage.setItem('PuzzleTime' + route.params?.id, String(minutes).padStart(2, '0') +
+                            ':' + String(seconds).padStart(2, '0'));
+                    }
+                }
+                //Get new best time to show in prompt
+                BestTime = await AsyncStorage.getItem('PuzzleTime' + route.params?.id);
+                setVisible(true);
+                pause();
             }
-            //Get new best time to show in prompt
-            const BestTime = storage.getString('PuzzleTime' + route.params?.id);
-            setVisible(true);
-            pause();
         }
+
+        doWin();
+
     }, [hasWon]);
 
     return (
@@ -84,8 +88,6 @@ export default function Nonogram() {
 
 
             {/*Shown when complete*/}
-
-            {visible && (<Confetti count={150} origin={{ x: 500 / 2, y: 0 }} fadeOut/> )}
             <Modal visible={visible} animationType="slide" transparent={true}
                    onRequestClose={() => setVisible(false)}>
                 <View style={[{flex: 1, justifyContent: 'center', alignItems:'center', backgroundColor: 'rgba(0, 0, 0, 0.5)'}]}>
