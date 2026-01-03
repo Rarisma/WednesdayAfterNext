@@ -85,7 +85,6 @@ export const useStyles = () => {
           backgroundColor: "#19647E",
           height:50,
           alignItems: 'center',
-          flexDirection: 'row'
       } as ViewStyle,
 
       filledCell: { backgroundColor: colors.text, borderColor: colors.text },

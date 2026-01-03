@@ -36,6 +36,7 @@ export default function Nonogram() {
     const colClues = solution[0].map((_, c) => getClues(solution.map(r => r[c])));
     const clueWidth = Math.max(...rowClues.map(c => c.length)) * 20;
     const clueHeight = Math.max(...colClues.map(c => c.length)) * 20;
+    const [mistakes, setMistakes] = useState(0);
     let BestTime = "none";
     //Use a stable key from the solution
     const boardKey = JSON.stringify(solution);
@@ -44,7 +45,7 @@ export default function Nonogram() {
     useEffect(() => {
          async function doWin() {
             if (hasWon) {
-                await AsyncStorage.setItem('Puzzle' + route.params?.id, true);
+                await AsyncStorage.setItem('Puzzle' + route.params?.id, 'true');
                 let best = await AsyncStorage.getItem('PuzzleTime' + route.params?.id);
 
                 if (best == undefined) { //No best time
@@ -81,7 +82,8 @@ export default function Nonogram() {
             <ScrollView horizontal contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}} style={{flex: 1}}>
                 <ScrollView contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}} style={{flex: 1}}>
                     <View style={{justifyContent: 'center', alignItems: 'center', paddingRight: clueWidth, paddingBottom: clueHeight }}>
-                        <Board key={boardKey} solution={solution} cellSize={40} onWin={() => setHasWon(true)}/>
+                        <Board key={boardKey} solution={solution} cellSize={40}
+                               onWin={() => setHasWon(true)} onMistake={setMistakes}/>
                     </View>
                 </ScrollView>
             </ScrollView>
@@ -94,8 +96,8 @@ export default function Nonogram() {
                     <View style={[Styles.Container, {height:350, width:300}]}>
                         <Text style={[Styles.Text, {textAlign: 'center', fontSize:32, marginBottom:30}]} >Solved! </Text>
                         <Text style={[Styles.Text, {textAlign: 'center'}]} >Your Time: {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')} </Text>
-                        <Text style={[Styles.Text, {textAlign: 'center', marginTop:10}]} >Best Time: {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}  </Text>
-                        <Text style={[Styles.Text, {textAlign: 'center', marginTop:10}]} >Mistakes: NOT IMPL </Text>
+                        <Text style={[Styles.Text, {textAlign: 'center', marginTop:10}]} >Best Time: {BestTime}  </Text>
+                        <Text style={[Styles.Text, {textAlign: 'center', marginTop:10}]} >Mistakes: {mistakes} </Text>
 
                         <TouchableOpacity style={[{marginTop:'auto', alignSelf:'center'}]} onPress={() => {
                                 const shareScore = async () => {

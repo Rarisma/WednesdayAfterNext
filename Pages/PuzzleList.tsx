@@ -1,12 +1,11 @@
 import UPNG from 'upng-js';
-import {View, Text, TouchableOpacity, Modal, Button} from 'react-native';
+import {View, Text, TouchableOpacity, Modal, Button, Switch} from 'react-native';
 import { Asset } from 'expo-asset';
 import {useStyles, useThemeColors} from "../Styles";
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import {useCallback, useState} from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
 //Registry of puzzles from assets.
 export const puzzleList = [
     { name: 'Target', asset: require('../assets/puzzles/Target.png'), size: "5x5" },
@@ -58,6 +57,7 @@ export default function PuzzleList() {
     const styles = useStyles();
     const colors = useThemeColors();
     const navigation = useNavigation<any>();
+    const [showSettings, setShowSettings] = useState(false);
     const [, invalidateLayout] = useState(0);
     useFocusEffect(useCallback(() => {invalidateLayout(n => n + 1); }, []));
     const handlePress = async (puzzle: typeof puzzleList[0]) => {
@@ -65,18 +65,27 @@ export default function PuzzleList() {
         navigation.navigate('Play', { solution: matrix, id:puzzleList.indexOf(puzzle), name:puzzle.name });
     };
 
+    const [puzzleData, setPuzzleData] = useState<{ completed: boolean; time: string }[]>([]);
+    useFocusEffect(useCallback(() => {
+        Promise.all(puzzleList.map(async (_, i) => ({
+            completed: await AsyncStorage.getItem('Puzzle' + i) === 'true',
+            time: await AsyncStorage.getItem('PuzzleTime' + i) || '',
+        }))).then(setPuzzleData);
+    }, []));
+
     return (
         <View style={styles.Page}>
-            {puzzleList.map(async (puzzle, index) => (
-                <TouchableOpacity activeOpacity={0.7} key={puzzle.name}  onPress={() => handlePress(puzzle)} >
-                    <View style={[styles.HorizontalContainer, {backgroundColor:colors.border}]}>
-                        {await AsyncStorage.getItem('Puzzle'+index) == 'true' ? (
-                            <Ionicons name="checkmark-circle-outline" size={28} color={colors.text} style={{marginRight:20}} />
-                        ) : (/* Empty padding to visually line up the puzzle titles */
-                            <View style={{ width: 46, height: 0 }} />)}
+            {puzzleList.map((puzzle, index) => (
+                <TouchableOpacity activeOpacity={0.7} key={puzzle.name} onPress={() => handlePress(puzzle)}>
+                    <View style={[styles.HorizontalContainer, {backgroundColor: colors.border}]}>
+                        {puzzleData[index]?.completed ? (
+                            <Ionicons name="checkmark-circle-outline" size={28} color={colors.text} style={{marginRight: 20}} />
+                        ) : (
+                            <View style={{ width: 46, height: 0 }} />
+                        )}
                         <Text style={styles.Text}>{puzzle.name}</Text>
                         <Text style={[styles.Text, { marginLeft: 'auto'}]}>{puzzle.size}</Text>
-                        <Text style={[styles.Text, { marginLeft:20 }]}>{await AsyncStorage.getItem('PuzzleTime'+index)}</Text>
+                        <Text style={[styles.Text, { marginLeft: 20 }]}>{puzzleData[index]?.time}</Text>
                     </View>
                 </TouchableOpacity>
             ))}
@@ -93,8 +102,45 @@ export default function PuzzleList() {
                     <Ionicons name="download-outline" size={24} color={"white"} />
                     <Text style={{color:"#fff", marginLeft:10}}>Get Puzzles</Text>
                 </TouchableOpacity>
-            </View>
 
+                <TouchableOpacity style={[styles.IconButton]} onPress={() => setShowSettings(true)}>
+                    <Ionicons name="settings-outline" size={24} color={"white"} />
+                </TouchableOpacity>
+            </View>
+            <SettingsPopup visible={showSettings} onClose={() => setShowSettings(false)} />
         </View>
     );
+}
+export function SettingsPopup({ visible, onClose }) {
+  const [mistakes, setMistakes] = useState(true);
+  const styles = useStyles();
+
+  return (
+    <Modal transparent visible={visible} onRequestClose={onClose} animationType="fade" style={styles.Container}>
+      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' }}>
+        <View style={[styles.Container, {margin: 50}]}>
+          <Text style={{ fontWeight: 'bold', marginBottom: 16 }}>Settings</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+            <Text style={styles.Text}>Fix mistakes</Text>
+            <Switch value={mistakes} onValueChange={setMistakes} />
+          </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+            <Text style={styles.Text}>Show timer</Text>
+            <Switch value={mistakes} onValueChange={setMistakes} />
+          </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+            <Text style={styles.Text}>Show best times</Text>
+            <Switch value={mistakes} onValueChange={setMistakes} />
+          </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+            <Text style={styles.Text}>Open to last puzzle</Text>
+            <Switch value={mistakes} onValueChange={setMistakes} />
+          </View>
+          <TouchableOpacity onPress={onClose} style={[styles.IconButton, {alignSelf: 'center' }]}>
+            <Ionicons name="close-outline" size={24} color={"white"} />
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
 }

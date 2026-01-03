@@ -10,6 +10,7 @@ interface NonogramProps {
     solution: number[][];
     cellSize?: number;
     onWin?: () => void;
+    onMistake?: (count: number) => void;
 }
 
 /**
@@ -31,11 +32,14 @@ const getClues = (line: number[]): number[] => {
     return clues.length ? clues : [0];
 };
 
-export function Board({solution, cellSize = 20, onWin}: NonogramProps) {
+export function Board({solution, cellSize = 20, onWin, onMistake}: NonogramProps) {
     //Get size of solutions.
     const rows = solution.length;
     const cols = solution[0].length;
 
+    const [locked, setLocked] = useState<boolean[][]>(() =>
+        Array(rows).fill(null).map(() => Array(cols).fill(false))
+    );
     //Check solution is provided
     if (solution == null) {return (<Text>Select a puzzle first!</Text>);}
     const styles = useStyles();
@@ -46,7 +50,7 @@ export function Board({solution, cellSize = 20, onWin}: NonogramProps) {
 
     const dragMode = useRef<CellState | null>(null);
     const visited = useRef(new Set<string>());
-
+    const [mistakes, setMistakes] = useState(0);
     const rowClues = useMemo(() => solution.map(getClues), [solution]);
     const colClues = useMemo(
         () => Array.from({length: cols}, (_, c) => getClues(solution.map(r => r[c]))),
@@ -76,13 +80,32 @@ export function Board({solution, cellSize = 20, onWin}: NonogramProps) {
         }
     }, [hasWon, onWin]);
 
+
     const setCell = useCallback((r: number, c: number, state: CellState) => {
+        if (locked[r][c]) return; //Ignore locked cells
+
+        const correct = solution[r][c] === 1;
+        const isMistake = (state === 1 && !correct) || (state === 2 && correct);
+
         setGrid(prev => {
             const next = prev.map(row => [...row]);
-            next[r][c] = state;
+            next[r][c] = isMistake ? (correct ? 1 : 2) : state;
             return next;
         });
-    }, []);
+
+        if (isMistake) {
+            setMistakes(prev => {
+                const next = prev + 1;
+                onMistake?.(next);
+                return next;
+            });
+            setLocked(prev => {
+                const next = prev.map(row => [...row]);
+                next[r][c] = true;
+                return next;
+            });
+        }
+    }, [locked, solution]);
 
     const toggleCell = useCallback((x: number, y: number, crossMode: boolean) => {
         const cell = posToCell(x, y);
@@ -167,11 +190,19 @@ export function Board({solution, cellSize = 20, onWin}: NonogramProps) {
                         <View style={[s.rowClue, {width: clueWidth, height: cellSize}]}>
                             {rowClues[r].map((n, i) => <Text key={i} style={[styles.Text, s.clueText]}>{n}</Text>)}
                         </View>
-                        {row.map((cell, c) => (
-                            <View key={c} style={[s.cell, {width: cellSize, height: cellSize}, cell === 1 && s.filled]}>
-                                {cell === 2 && <Text style={styles.Text}>✕</Text>}
-                            </View>
-                        ))}
+                            {row.map((cell, c) => (
+                                <View
+                                    key={c}
+                                    style={[
+                                        s.cell,
+                                        {width: cellSize, height: cellSize},
+                                        cell === 1 && s.filled,
+                                        locked[r][c] && s.locked
+                                    ]}
+                                >
+                                    {cell === 2 && <Text style={styles.Text}>✕</Text>}
+                                </View>
+                            ))}
                     </View>
                 ))}
             </View>
@@ -206,4 +237,12 @@ const s = StyleSheet.create({
         alignItems: 'center',
     },
     filled: {backgroundColor: '#333'},
+locked: {
+    backgroundColor: '#ffcccc', // Red tint for mistakes
+    opacity: 0.7,
+},
+// Update filled+locked combo:
+filledLocked: {
+    backgroundColor: '#994444',
+},
 });

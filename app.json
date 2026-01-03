@@ -1,12 +1,12 @@
 {
   "expo": {
     "plugins": [
-      "@react-native-google-signin/google-signin"
+      "expo-web-browser"
     ],
     "name": "Nonogame",
     "slug": "WednesdayAfterNext",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -25,6 +25,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "resizeableActivity": true,
       "edgeToEdgeEnabled": true,
       "package": "net.rarisma.wednesdayafternext"
     },
